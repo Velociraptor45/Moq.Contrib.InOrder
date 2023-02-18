@@ -11,17 +11,9 @@ namespace Moq.InOrder
         public static IQueueComponent CurrentInstance { get; set; }
     }
 
-    public enum ItemType
-    {
-        Call,
-        Loop
-    }
-
     public class Call : IQueueItem
     {
         private readonly Times _times;
-
-        public ItemType Type => ItemType.Call;
 
         public Call(string expression, Times times)
         {
@@ -66,14 +58,12 @@ namespace Moq.InOrder
     public class Loop : IQueueComponent, IQueueItem
     {
         private readonly List<IQueueItem> _items = new List<IQueueItem>();
-        private Times _times;
+        private readonly Times _times;
 
         public Loop(Times times)
         {
             _times = times;
         }
-
-        public ItemType Type => ItemType.Loop;
 
         public void RegisterLoop(Action<IQueueComponent> value, Times times)
         {
@@ -194,8 +184,6 @@ namespace Moq.InOrder
 
     public interface IQueueItem
     {
-        ItemType Type { get; }
-
         void VerifyOrder(IList<Call> callQueue);
 
         bool IsSatisfiedBy(Call call);
