@@ -27,6 +27,9 @@ namespace Moq.InOrder
         {
             if (!Items.Any())
                 throw new InvalidOperationException("Loop does not contain any setups");
+            if (Items.Count == 1)
+                throw new InvalidOperationException(
+                    "Loops with only one call are currently not supported. Please use the 'times' argument on '.SetupInOrder()' instead");
 
             var (min, max) = _times;
             var actualCount = 0;

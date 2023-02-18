@@ -387,6 +387,30 @@ public class CallQueueTests
     }
 
     [Fact]
+    public void VerifyOrder_Loop_OnlyOneCall_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            x0.RegisterLoop(x1 =>
+            {
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
+            });
+        });
+
+        mock.Object.ExecuteAction(new DummyClass("x"));
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>().WithMessage(
+            "Loops with only one call are currently not supported. Please use the 'times' argument on '.SetupInOrder()' instead");
+    }
+
+    [Fact]
     public void Create_ShouldNotThrow()
     {
         // Arrange
