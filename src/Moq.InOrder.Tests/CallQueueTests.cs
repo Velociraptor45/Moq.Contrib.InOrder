@@ -68,7 +68,7 @@ public class CallQueueTests
 
         // Assert
         act.Should().Throw<MoqOrderViolatedException>().WithMessage(
-            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nexactly 2 times but received it 1 time(s)");
+            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nexactly 2 time(s) but received it 1 time(s)");
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class CallQueueTests
 
         // Assert
         act.Should().Throw<MoqOrderViolatedException>().WithMessage(
-            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nexactly 1 times but received it 2 time(s)");
+            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nexactly 1 time(s) but received it 2 time(s)");
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public class CallQueueTests
 
         // Assert
         act.Should().Throw<MoqOrderViolatedException>().WithMessage(
-            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nbetween 2 and 2147483647 times but received it 1 time(s)");
+            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nbetween 2 and 2147483647 time(s) but received it 1 time(s)");
     }
 
     [Theory]
@@ -243,7 +243,7 @@ public class CallQueueTests
 
         // Assert
         act.Should().Throw<MoqOrderViolatedException>().WithMessage(
-            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nbetween 0 and 1 times but received it 2 time(s)");
+            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nbetween 0 and 1 time(s) but received it 2 time(s)");
     }
 
     [Fact]
@@ -311,7 +311,7 @@ public class CallQueueTests
 
         // Assert
         act.Should().Throw<MoqOrderViolatedException>().WithMessage(
-            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"x\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nexactly 1 times but received it 0 time(s)");
+            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"x\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nexactly 1 time(s) but received it 0 time(s)");
     }
 
     [Fact]
@@ -456,8 +456,178 @@ public class CallQueueTests
         act.Should().NotThrow();
     }
 
+    [Fact]
+    public void VerifyOrder_GetProperty_OneCall_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupGetInOrder(x => x.MyProperty).Returns(5);
+        });
+
+        _ = mock.Object.MyProperty;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_GetProperty_TwoCalls_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupGetInOrder(x => x.MyProperty, Times.Exactly(2)).Returns(5);
+        });
+
+        _ = mock.Object.MyProperty;
+        _ = mock.Object.MyProperty;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_GetProperty_OneCallTooMany_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupGetInOrder(x => x.MyProperty).Returns(5);
+        });
+
+        _ = mock.Object.MyProperty;
+        _ = mock.Object.MyProperty;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>()
+            .WithMessage("Expected x => x.MyProperty exactly 1 time(s) but received it 2 time(s)");
+    }
+
+    [Fact]
+    public void VerifyOrder_GetProperty_OnlySetCalled_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupGetInOrder(x => x.MyProperty).Returns(5);
+        });
+
+        mock.Object.MyProperty = 5;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>()
+            .WithMessage("Expected x => x.MyProperty exactly 1 time(s) but received it 0 time(s)");
+    }
+
+    [Fact]
+    public void VerifyOrder_SetProperty_OneCall_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupSetInOrder(x => x.MyProperty = 5);
+        });
+
+        mock.Object.MyProperty = 5;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_SetProperty_TwoCalls_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupSetInOrder(x => x.MyProperty = 5, Times.Exactly(2));
+        });
+
+        mock.Object.MyProperty = 5;
+        mock.Object.MyProperty = 5;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_SetProperty_OneCallTooMany_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupSetInOrder(x => x.MyProperty = 5);
+        });
+
+        mock.Object.MyProperty = 5;
+        mock.Object.MyProperty = 5;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>()
+            .WithMessage("Expected x => x.MyProperty = 5 exactly 1 time(s) but received it 2 time(s)");
+    }
+
+    [Fact]
+    public void VerifyOrder_SetProperty_OnlyGetCalled_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupSetInOrder(x => x.MyProperty = 5);
+        });
+
+        _ = mock.Object.MyProperty;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>()
+            .WithMessage("Expected x => x.MyProperty = 5 exactly 1 time(s) but received it 0 time(s)");
+    }
+
     public interface IDummy
     {
+        public int MyProperty { get; set; }
+
         void ExecuteAction(string s);
 
         void ExecuteAction(DummyClass c);

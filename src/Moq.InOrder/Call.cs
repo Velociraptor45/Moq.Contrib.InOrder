@@ -1,8 +1,10 @@
 ﻿using Moq.InOrder.Exceptions;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Moq.InOrder
 {
+    [DebuggerDisplay("{Expression}")]
     public class Call : IQueueItem
     {
         private readonly Times _times;
@@ -35,9 +37,9 @@ namespace Moq.InOrder
             if (actualCount < min || max < actualCount)
             {
                 if (min == max)
-                    throw new MoqOrderViolatedException($"Expected {Expression} exactly {min} times but received it {actualCount} time(s)");
+                    throw new MoqOrderViolatedException($"Expected {Expression} exactly {min} time(s) but received it {actualCount} time(s)");
 
-                throw new MoqOrderViolatedException($"Expected {Expression} between {min} and {max} times but received it {actualCount} time(s)");
+                throw new MoqOrderViolatedException($"Expected {Expression} between {min} and {max} time(s) but received it {actualCount} time(s)");
             }
         }
 

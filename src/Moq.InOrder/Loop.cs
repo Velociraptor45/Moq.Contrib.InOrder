@@ -58,9 +58,9 @@ namespace Moq.InOrder
             if (actualCount < min || max < actualCount)
             {
                 if (min == max)
-                    throw new MoqOrderViolatedException($"Expected loop{Environment.NewLine}{Expression}{Environment.NewLine}exactly {min} times but received it {actualCount} time(s)");
+                    throw new MoqOrderViolatedException($"Expected loop{Environment.NewLine}{Expression}{Environment.NewLine}exactly {min} time(s) but received it {actualCount} time(s)");
 
-                throw new MoqOrderViolatedException($"Expected loop{Environment.NewLine}{Expression}{Environment.NewLine}between {min} and {max} times but received it {actualCount} time(s)");
+                throw new MoqOrderViolatedException($"Expected loop{Environment.NewLine}{Expression}{Environment.NewLine}between {min} and {max} time(s) but received it {actualCount} time(s)");
             }
         }
 
