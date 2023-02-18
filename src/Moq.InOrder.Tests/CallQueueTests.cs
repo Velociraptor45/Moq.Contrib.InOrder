@@ -315,6 +315,44 @@ public class CallQueueTests
     }
 
     [Fact]
+    public void VerifyOrder_LoopInLoop_InnerLoopRegisteredOnQueue_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(q =>
+        {
+            q.RegisterLoop(x1 =>
+            {
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
+
+                q.RegisterLoop(x1 =>
+                {
+                    mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
+                    mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+                }, Times.Exactly(2));
+            }, Times.Exactly(2));
+        });
+
+        mock.Object.ExecuteAction(new DummyClass("x"));
+        mock.Object.ExecuteAction(new DummyClass("y"));
+        mock.Object.ExecuteAction(new DummyClass("x"));
+        mock.Object.ExecuteAction(new DummyClass("y"));
+
+        mock.Object.ExecuteAction(new DummyClass("a"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+        mock.Object.ExecuteAction(new DummyClass("a"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
     public void VerifyOrder_LoopInLoop_InnerLoopCallMissing_ShouldThrow()
     {
         // Arrange
