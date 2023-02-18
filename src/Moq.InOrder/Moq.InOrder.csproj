@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Title>Moq.InOrder</Title>
+    <Version>1.0.0</Version>
+    <Authors>David Krammer</Authors>
+    <Company />
+    <Copyright></Copyright>
+    <Description>Ensures that mock calls are executed in the correct order. Check out the GitHub repository for more information &amp; examples</Description>
+    <RepositoryUrl>https://github.com/Velociraptor45/Moq.InOrder</RepositoryUrl>
+    <PackageTags>moq; mock;</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
