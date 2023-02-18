@@ -225,6 +225,28 @@ public class CallQueueTests
         act.Should().Throw<MoqOrderViolatedException>(); // todo message
     }
 
+    [Fact]
+    public void Create_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        // Act
+        Action act = () => CallQueue.Create(x0 =>
+        {
+            mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
+
+            x0.RegisterLoop(x1 =>
+            {
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
+            });
+        });
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
     public interface IDummy
     {
         void ExecuteAction(string s);

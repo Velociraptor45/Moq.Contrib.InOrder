@@ -15,8 +15,8 @@ namespace Moq.InOrder.Extensions
             Func<Times> times) where T : class
         {
             var setup = mock.Setup(expression);
-            var call = Queue.CurrentInstance.RegisterCall(setup.ToString(), times);
-            setup.Callback(() => Queue.RootInstance.ReceiveCall(call));
+            var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
+            setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
             return setup;
         }
 
