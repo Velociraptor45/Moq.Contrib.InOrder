@@ -125,6 +125,122 @@ public class CallQueueTests
         act.Should().Throw<MoqOrderViolatedException>(); // todo message
     }
 
+    [Theory]
+    [InlineData(1, 1)]
+    [InlineData(1, 2)]
+    [InlineData(3, 5)]
+    public void VerifyOrder_LoopAtLeastCount_MeetExpectedCount_ShouldNotThrow(int atLeaseExpectedLoopCount,
+        int actualLoopCount)
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            x0.RegisterLoop(x1 =>
+            {
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+            }, Times.AtLeast(atLeaseExpectedLoopCount));
+        });
+
+        for (int i = 0; i < actualLoopCount; i++)
+        {
+            mock.Object.ExecuteAction(new DummyClass("a"));
+            mock.Object.ExecuteAction(new DummyClass("b"));
+        }
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_LoopAtLeastCount_NotReachExpectedCount_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            x0.RegisterLoop(x1 =>
+            {
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+            }, Times.AtLeast(2));
+        });
+
+        mock.Object.ExecuteAction(new DummyClass("a"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>(); // todo message
+    }
+
+    [Theory]
+    [InlineData(2, 1)]
+    [InlineData(2, 2)]
+    public void VerifyOrder_LoopAtMostCount_MeetExpectedCount_ShouldNotThrow(int atMostExpectedLoopCount,
+        int actualLoopCount)
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            x0.RegisterLoop(x1 =>
+            {
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+            }, Times.AtMost(atMostExpectedLoopCount));
+        });
+
+        for (int i = 0; i < actualLoopCount; i++)
+        {
+            mock.Object.ExecuteAction(new DummyClass("a"));
+            mock.Object.ExecuteAction(new DummyClass("b"));
+        }
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_LoopAtMostCount_ExceedingExpectedCount_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            x0.RegisterLoop(x1 =>
+            {
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+            }, Times.AtMost(1));
+        });
+
+        mock.Object.ExecuteAction(new DummyClass("a"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+
+        mock.Object.ExecuteAction(new DummyClass("a"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>(); // todo message
+    }
+
     [Fact]
     public void VerifyOrder_LoopInLoop_ValidCalls_ShouldNotThrow()
     {
