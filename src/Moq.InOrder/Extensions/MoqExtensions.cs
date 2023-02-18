@@ -8,11 +8,11 @@ namespace Moq.InOrder.Extensions
         public static Language.Flow.ISetup<T> SetupInOrder<T>(this Mock<T> mock, Expression<Action<T>> expression)
             where T : class
         {
-            return mock.SetupInOrder(expression, Times.Once);
+            return mock.SetupInOrder(expression, Times.Once());
         }
 
         public static Language.Flow.ISetup<T> SetupInOrder<T>(this Mock<T> mock, Expression<Action<T>> expression,
-            Func<Times> times) where T : class
+            Times times) where T : class
         {
             var setup = mock.Setup(expression);
             var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);

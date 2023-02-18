@@ -8,6 +8,6 @@ namespace Moq.InOrder
 
         void RegisterLoop(Action<IQueueComponent> value, Times times);
 
-        Call RegisterCall(string callExpression, Func<Times> times);
+        Call RegisterCall(string callExpression, Times times);
     }
 }

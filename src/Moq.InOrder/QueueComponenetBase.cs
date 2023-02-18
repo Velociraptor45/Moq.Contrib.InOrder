@@ -9,9 +9,9 @@ namespace Moq.InOrder
         public static CallQueue RootInstance { get; set; }
         internal static IQueueComponent CurrentInstance { get; set; }
 
-        public Call RegisterCall(string callExpression, Func<Times> times)
+        public Call RegisterCall(string callExpression, Times times)
         {
-            var call = new Call(callExpression, times());
+            var call = new Call(callExpression, times);
             Items.Add(call);
             return call;
         }

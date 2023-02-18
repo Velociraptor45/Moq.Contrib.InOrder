@@ -50,7 +50,7 @@ public class CallQueueTests
             mock.SetupInOrder(x => x.ExecuteAction("a"));
             mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
 
-            x0.RegisterLoop(x1 =>
+            x0.RegisterLoop(_ =>
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
