@@ -14,6 +14,15 @@ namespace Moq.InOrder
             _times = times;
         }
 
+        public string Expression
+        {
+            get
+            {
+                var expressions = Items.Select(x => x.Expression);
+                return string.Join($",{Environment.NewLine}", expressions);
+            }
+        }
+
         public void VerifyOrder(IList<Call> callQueue)
         {
             if (!Items.Any())
@@ -32,6 +41,12 @@ namespace Moq.InOrder
 
                 foreach (var item in Items)
                 {
+                    if (!callQueue.Any())
+                    {
+                        throw new MoqOrderViolatedException(
+                            $"Loop{Environment.NewLine}{Expression}{Environment.NewLine}is missing {item.Expression} after {actualCount} complete run(s)");
+                    }
+
                     item.VerifyOrder(callQueue);
                 }
 
@@ -41,9 +56,9 @@ namespace Moq.InOrder
             if (actualCount < min || max < actualCount)
             {
                 if (min == max)
-                    throw new MoqOrderViolatedException($"Expected loop exactly {min} times but received it {actualCount} times");
+                    throw new MoqOrderViolatedException($"Expected loop{Environment.NewLine}{Expression}{Environment.NewLine}exactly {min} times but received it {actualCount} time(s)");
 
-                throw new MoqOrderViolatedException($"Expected loop between {min} and {max} times but received it {actualCount} times");
+                throw new MoqOrderViolatedException($"Expected loop{Environment.NewLine}{Expression}{Environment.NewLine}between {min} and {max} times but received it {actualCount} time(s)");
             }
         }
 

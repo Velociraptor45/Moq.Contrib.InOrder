@@ -36,9 +36,9 @@ namespace Moq.InOrder
             if (actualCount < min || max < actualCount)
             {
                 if (min == max)
-                    throw new MoqOrderViolatedException($"Expected {Expression} exactly {min} times but received it {actualCount} times");
+                    throw new MoqOrderViolatedException($"Expected {Expression} exactly {min} times but received it {actualCount} time(s)");
 
-                throw new MoqOrderViolatedException($"Expected {Expression} between {min} and {max} times but received it {actualCount} times");
+                throw new MoqOrderViolatedException($"Expected {Expression} between {min} and {max} times but received it {actualCount} time(s)");
             }
         }
 

@@ -67,7 +67,8 @@ public class CallQueueTests
         Action act = () => queue.VerifyOrder();
 
         // Assert
-        act.Should().Throw<MoqOrderViolatedException>(); // todo message
+        act.Should().Throw<MoqOrderViolatedException>().WithMessage(
+            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nexactly 2 times but received it 1 time(s)");
     }
 
     [Fact]
@@ -95,7 +96,8 @@ public class CallQueueTests
         Action act = () => queue.VerifyOrder();
 
         // Assert
-        act.Should().Throw<MoqOrderViolatedException>(); // todo message
+        act.Should().Throw<MoqOrderViolatedException>().WithMessage(
+            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nexactly 1 times but received it 2 time(s)");
     }
 
     [Fact]
@@ -122,7 +124,8 @@ public class CallQueueTests
         Action act = () => queue.VerifyOrder();
 
         // Assert
-        act.Should().Throw<MoqOrderViolatedException>(); // todo message
+        act.Should().Throw<MoqOrderViolatedException>().WithMessage(
+            "Loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nis missing x => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S)) after 1 complete run(s)");
     }
 
     [Theory]
@@ -179,7 +182,8 @@ public class CallQueueTests
         Action act = () => queue.VerifyOrder();
 
         // Assert
-        act.Should().Throw<MoqOrderViolatedException>(); // todo message
+        act.Should().Throw<MoqOrderViolatedException>().WithMessage(
+            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nbetween 2 and 2147483647 times but received it 1 time(s)");
     }
 
     [Theory]
@@ -238,7 +242,8 @@ public class CallQueueTests
         Action act = () => queue.VerifyOrder();
 
         // Assert
-        act.Should().Throw<MoqOrderViolatedException>(); // todo message
+        act.Should().Throw<MoqOrderViolatedException>().WithMessage(
+            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nbetween 0 and 1 times but received it 2 time(s)");
     }
 
     [Fact]
@@ -305,7 +310,8 @@ public class CallQueueTests
         Action act = () => queue.VerifyOrder();
 
         // Assert
-        act.Should().Throw<MoqOrderViolatedException>(); // todo message
+        act.Should().Throw<MoqOrderViolatedException>().WithMessage(
+            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"x\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nexactly 1 times but received it 0 time(s)");
     }
 
     [Fact]
@@ -338,7 +344,8 @@ public class CallQueueTests
         Action act = () => queue.VerifyOrder();
 
         // Assert
-        act.Should().Throw<MoqOrderViolatedException>(); // todo message
+        act.Should().Throw<MoqOrderViolatedException>().WithMessage(
+            "Loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nis missing x => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S)) after 0 complete run(s)");
     }
 
     [Fact]
