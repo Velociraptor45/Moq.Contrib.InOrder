@@ -1,5 +1,4 @@
 ﻿using Moq.InOrder.Exceptions;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Moq.InOrder
@@ -16,7 +15,7 @@ namespace Moq.InOrder
 
         public string Expression { get; }
 
-        public void VerifyOrder(IList<Call> callQueue)
+        public void VerifyOrder(Calls callQueue)
         {
             var (min, max) = _times;
             var actualCount = 0;
@@ -30,7 +29,7 @@ namespace Moq.InOrder
                 }
 
                 actualCount++;
-                callQueue.RemoveAt(0);
+                callQueue.RemoveFirst();
             }
 
             if (actualCount < min || max < actualCount)

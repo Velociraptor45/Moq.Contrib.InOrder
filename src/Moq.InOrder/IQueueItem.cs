@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-
-namespace Moq.InOrder
+﻿namespace Moq.InOrder
 {
     internal interface IQueueItem
     {
         string Expression { get; }
 
-        void VerifyOrder(IList<Call> callQueue);
+        void VerifyOrder(Calls callQueue);
 
         bool StartsWith(Call call);
     }

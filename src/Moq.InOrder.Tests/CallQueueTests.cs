@@ -411,6 +411,30 @@ public class CallQueueTests
     }
 
     [Fact]
+    public void VerifyOrder_TooManyCalls_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
+            mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
+        });
+
+        mock.Object.ExecuteAction(new DummyClass("x"));
+        mock.Object.ExecuteAction(new DummyClass("y"));
+        mock.Object.ExecuteAction(new DummyClass("x"));
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>().WithMessage(
+            "All setups satisfied but the following calls are remaining and missing a corresponding setup:\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"x\").S))");
+    }
+
+    [Fact]
     public void Create_ShouldNotThrow()
     {
         // Arrange

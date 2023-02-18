@@ -1,6 +1,5 @@
 ﻿using Moq.InOrder.Exceptions;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Moq.InOrder
@@ -23,7 +22,7 @@ namespace Moq.InOrder
             }
         }
 
-        public void VerifyOrder(IList<Call> callQueue)
+        public void VerifyOrder(Calls callQueue)
         {
             if (!Items.Any())
                 throw new InvalidOperationException("Loop does not contain any setups");

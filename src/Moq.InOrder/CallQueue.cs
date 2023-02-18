@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Moq.InOrder.Exceptions;
+using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Moq.InOrder.Tests")]
@@ -8,7 +9,7 @@ namespace Moq.InOrder
 {
     public class CallQueue : QueueComponenetBase
     {
-        private readonly IList<Call> _receivedCalls = new List<Call>();
+        private readonly Calls _receivedCalls = new Calls();
 
         public static CallQueue Create(Action<IQueueComponent> value)
         {
@@ -31,6 +32,10 @@ namespace Moq.InOrder
             {
                 item.VerifyOrder(_receivedCalls);
             }
+
+            if (_receivedCalls.Any())
+                throw new MoqOrderViolatedException(
+                    $"All setups satisfied but the following calls are remaining and missing a corresponding setup:{Environment.NewLine}{_receivedCalls.Expressions}");
         }
     }
 }
