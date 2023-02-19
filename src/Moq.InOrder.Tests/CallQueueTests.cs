@@ -624,9 +624,263 @@ public class CallQueueTests
             .WithMessage("Expected x => x.MyProperty = 5 exactly 1 time(s) but received it 0 time(s)");
     }
 
+    [Fact]
+    public void VerifyOrder_SetPropertyCasted_OneCall_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupSetInOrder<IDummy, int>(x => x.MyProperty = 5);
+        });
+
+        mock.Object.MyProperty = 5;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_SetPropertyCasted_TwoCalls_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupSetInOrder<IDummy, int>(x => x.MyProperty = 5, Times.Exactly(2));
+        });
+
+        mock.Object.MyProperty = 5;
+        mock.Object.MyProperty = 5;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_SetPropertyCasted_OneCallTooMany_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupSetInOrder<IDummy, int>(x => x.MyProperty = 5);
+        });
+
+        mock.Object.MyProperty = 5;
+        mock.Object.MyProperty = 5;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>()
+            .WithMessage("Expected x => x.MyProperty = 5 exactly 1 time(s) but received it 2 time(s)");
+    }
+
+    [Fact]
+    public void VerifyOrder_SetPropertyCasted_OnlyGetCalled_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupSetInOrder<IDummy, int>(x => x.MyProperty = 5);
+        });
+
+        _ = mock.Object.MyProperty;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>()
+            .WithMessage("Expected x => x.MyProperty = 5 exactly 1 time(s) but received it 0 time(s)");
+    }
+
+    [Fact]
+    public void VerifyOrder_Add_OneCall_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupAddInOrder(x => x.EventHandler += DummyClass.DummyMethod);
+        });
+
+        mock.Object.EventHandler += DummyClass.DummyMethod;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_Add_TwoCalls_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupAddInOrder(x => x.EventHandler += DummyClass.DummyMethod, Times.Exactly(2));
+        });
+
+        mock.Object.EventHandler += DummyClass.DummyMethod;
+        mock.Object.EventHandler += DummyClass.DummyMethod;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_Add_OneCallTooMany_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupAddInOrder(x => x.EventHandler += DummyClass.DummyMethod);
+        });
+
+        mock.Object.EventHandler += DummyClass.DummyMethod;
+        mock.Object.EventHandler += DummyClass.DummyMethod;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>()
+            .WithMessage("Expected x => x.EventHandler += EventHandler exactly 1 time(s) but received it 2 time(s)");
+    }
+
+    [Fact]
+    public void VerifyOrder_Add_OnlyRemoveCalled_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupAddInOrder(x => x.EventHandler += DummyClass.DummyMethod);
+        });
+
+        mock.Object.EventHandler -= DummyClass.DummyMethod;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>()
+            .WithMessage("Expected x => x.EventHandler += EventHandler exactly 1 time(s) but received it 0 time(s)");
+    }
+
+    [Fact]
+    public void VerifyOrder_Remove_OneCall_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupRemoveInOrder(x => x.EventHandler -= DummyClass.DummyMethod);
+        });
+
+        mock.Object.EventHandler -= DummyClass.DummyMethod;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_Remove_TwoCalls_ShouldNotThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupRemoveInOrder(x => x.EventHandler -= DummyClass.DummyMethod, Times.Exactly(2));
+        });
+
+        mock.Object.EventHandler -= DummyClass.DummyMethod;
+        mock.Object.EventHandler -= DummyClass.DummyMethod;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_Remove_OneCallTooMany_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupRemoveInOrder(x => x.EventHandler -= DummyClass.DummyMethod);
+        });
+
+        mock.Object.EventHandler -= DummyClass.DummyMethod;
+        mock.Object.EventHandler -= DummyClass.DummyMethod;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>()
+            .WithMessage("Expected x => x.EventHandler -= EventHandler exactly 1 time(s) but received it 2 time(s)");
+    }
+
+    [Fact]
+    public void VerifyOrder_Remove_OnlyAddCalled_ShouldThrow()
+    {
+        // Arrange
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupRemoveInOrder(x => x.EventHandler -= DummyClass.DummyMethod);
+        });
+
+        mock.Object.EventHandler += DummyClass.DummyMethod;
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().Throw<MoqOrderViolatedException>()
+            .WithMessage("Expected x => x.EventHandler -= EventHandler exactly 1 time(s) but received it 0 time(s)");
+    }
+
     public interface IDummy
     {
         public int MyProperty { get; set; }
+
+        public event EventHandler EventHandler;
 
         void ExecuteAction(string s);
 
@@ -641,5 +895,10 @@ public class CallQueueTests
         }
 
         public string S { get; }
+
+        public static void DummyMethod(object? o, EventArgs args)
+        {
+            // dummy
+        }
     }
 }

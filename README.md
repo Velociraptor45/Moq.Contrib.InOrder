@@ -2,7 +2,7 @@
 
 Moq.InOrder is a library for ensuring that mock methods are called in correct order while strictly separating the acting & verification phase.
 
-Register all mock setups that should be taken into account when verifying the call order in a `var queue = CallQueue.Create(x => { /* here */});`. To mark a mock method as relevant for order verification, use `.SetupInOrder()` instead of the normal `.Setup()` provided by moq.
+Register all mock setups that should be taken into account when verifying the call order in a `var queue = CallQueue.Create(x => { /* here */});`. To mark a mock method as relevant for order verification, use `.SetupInOrder(...)` instead of the normal `.Setup(...)` provided by moq (for every of moq's `Setup` methods, there is an `InOrder` version, e.g. `SetupGetInOrder`, `SetupAddInOrder`, etc).
 Verify the call order after executing your test method by `queue.VerifyOrder()`.
 
 # Examples

@@ -79,5 +79,35 @@ namespace Moq.InOrder.Extensions
             setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
             return setup;
         }
+
+        public static Language.Flow.ISetup<T> SetupAddInOrder<T>(this Mock<T> mock,
+            Action<T> expression) where T : class
+        {
+            return mock.SetupAddInOrder(expression, Times.Once());
+        }
+
+        public static Language.Flow.ISetup<T> SetupAddInOrder<T>(this Mock<T> mock,
+            Action<T> expression, Times times) where T : class
+        {
+            var setup = mock.SetupAdd(expression);
+            var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
+            setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            return setup;
+        }
+
+        public static Language.Flow.ISetup<T> SetupRemoveInOrder<T>(this Mock<T> mock,
+            Action<T> expression) where T : class
+        {
+            return mock.SetupRemoveInOrder(expression, Times.Once());
+        }
+
+        public static Language.Flow.ISetup<T> SetupRemoveInOrder<T>(this Mock<T> mock,
+            Action<T> expression, Times times) where T : class
+        {
+            var setup = mock.SetupRemove(expression);
+            var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
+            setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            return setup;
+        }
     }
 }
