@@ -15,8 +15,11 @@ namespace Moq.Contrib.InOrder.Extensions
             Times times) where T : class
         {
             var setup = mock.Setup(expression);
-            var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
-            setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            if (QueueComponenetBase.CurrentInstance != null && QueueComponenetBase.RootInstance != null)
+            {
+                var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
+                setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            }
             return setup;
         }
 
@@ -30,8 +33,11 @@ namespace Moq.Contrib.InOrder.Extensions
             Expression<Func<T, TResult>> expression, Times times) where T : class
         {
             var setup = mock.Setup(expression);
-            var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
-            setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            if (QueueComponenetBase.CurrentInstance != null && QueueComponenetBase.RootInstance != null)
+            {
+                var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
+                setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            }
             return setup;
         }
 
@@ -45,8 +51,11 @@ namespace Moq.Contrib.InOrder.Extensions
             Expression<Func<T, TProperty>> expression, Times times) where T : class
         {
             var setup = mock.SetupGet(expression);
-            var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
-            setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            if (QueueComponenetBase.CurrentInstance != null && QueueComponenetBase.RootInstance != null)
+            {
+                var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
+                setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            }
             return setup;
         }
 
@@ -60,8 +69,11 @@ namespace Moq.Contrib.InOrder.Extensions
             Action<T> expression, Times times) where T : class
         {
             var setup = mock.SetupSet<TProperty>(expression);
-            var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
-            setup.Callback(p => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            if (QueueComponenetBase.CurrentInstance != null && QueueComponenetBase.RootInstance != null)
+            {
+                var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
+                setup.Callback(p => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            }
             return setup;
         }
 
@@ -75,8 +87,11 @@ namespace Moq.Contrib.InOrder.Extensions
             Action<T> expression, Times times) where T : class
         {
             var setup = mock.SetupSet(expression);
-            var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
-            setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            if (QueueComponenetBase.CurrentInstance != null && QueueComponenetBase.RootInstance != null)
+            {
+                var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
+                setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            }
             return setup;
         }
 
@@ -90,8 +105,11 @@ namespace Moq.Contrib.InOrder.Extensions
             Action<T> expression, Times times) where T : class
         {
             var setup = mock.SetupAdd(expression);
-            var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
-            setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            if (QueueComponenetBase.CurrentInstance != null && QueueComponenetBase.RootInstance != null)
+            {
+                var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
+                setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            }
             return setup;
         }
 
@@ -105,8 +123,11 @@ namespace Moq.Contrib.InOrder.Extensions
             Action<T> expression, Times times) where T : class
         {
             var setup = mock.SetupRemove(expression);
-            var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
-            setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            if (QueueComponenetBase.CurrentInstance != null && QueueComponenetBase.RootInstance != null)
+            {
+                var call = QueueComponenetBase.CurrentInstance.RegisterCall(setup.ToString(), times);
+                setup.Callback(() => QueueComponenetBase.RootInstance.ReceiveCall(call));
+            }
             return setup;
         }
     }
