@@ -1,0 +1,13 @@
+.vs/
+bin/
+obj/
+[Ss]sl/
+
+*.user
+
+*.pfx
+*.dll
+
+# logs
+**/[Ll]ogs/
+**/[Ll]og/
