@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Moq.InOrder
+namespace Moq.Contrib.InOrder
 {
     public abstract class QueueComponenetBase : IQueueComponent
     {

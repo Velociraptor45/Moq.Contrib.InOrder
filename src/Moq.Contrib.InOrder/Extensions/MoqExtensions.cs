@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace Moq.InOrder.Extensions
+namespace Moq.Contrib.InOrder.Extensions
 {
     public static class MoqExtensions
     {

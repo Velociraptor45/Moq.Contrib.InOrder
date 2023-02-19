@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Moq.InOrder.Exceptions
+namespace Moq.Contrib.InOrder.Exceptions
 {
     public class MoqOrderViolatedException : Exception
     {

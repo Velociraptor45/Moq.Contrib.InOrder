@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Moq.InOrder\Moq.InOrder.csproj" />
+    <ProjectReference Include="..\Moq.Contrib.InOrder\Moq.Contrib.InOrder.csproj" />
   </ItemGroup>
 
 </Project>

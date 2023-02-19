@@ -1,8 +1,8 @@
-﻿using Moq.InOrder.Exceptions;
+﻿using Moq.Contrib.InOrder.Exceptions;
 using System;
 using System.Linq;
 
-namespace Moq.InOrder
+namespace Moq.Contrib.InOrder
 {
     internal class Loop : QueueComponenetBase, IQueueItem
     {

@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Moq.InOrder.Exceptions;
-using Moq.InOrder.Extensions;
+using Moq.Contrib.InOrder.Exceptions;
+using Moq.Contrib.InOrder.Extensions;
 
-namespace Moq.InOrder.Tests;
+namespace Moq.Contrib.InOrder.Tests;
 
 public class CallQueueTests
 {

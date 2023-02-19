@@ -1,8 +1,8 @@
-﻿using Moq.InOrder.Exceptions;
+﻿using Moq.Contrib.InOrder.Exceptions;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Moq.InOrder
+namespace Moq.Contrib.InOrder
 {
     [DebuggerDisplay("{Expression}")]
     public class Call : IQueueItem

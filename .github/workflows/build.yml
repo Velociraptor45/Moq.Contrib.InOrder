@@ -33,19 +33,19 @@ jobs:
           dotnet tool install --global dotnet-sonarscanner
       - name: Restore
         run: |
-          dotnet restore src/Moq.InOrder.sln
+          dotnet restore src/Moq.Contrib.InOrder.sln
       - name: Begin Sonar scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet-sonarscanner begin /k:"Velociraptor45_Moq.InOrder" /o:"velociraptor45" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths=src/TestResults/coverage.opencover.xml
+          dotnet-sonarscanner begin /k:"Velociraptor45_Moq.Contrib.InOrder" /o:"velociraptor45" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths=src/TestResults/coverage.opencover.xml
       - name: Build
         run: |
-          dotnet build src/Moq.InOrder.sln
+          dotnet build src/Moq.Contrib.InOrder.sln
       - name: Test
         run: |
-          dotnet test ./src/Moq.InOrder.sln --logger:trx --results-directory TestResults "/p:CollectCoverage=true" "/p:CoverletOutput=../TestResults/" "/p:CoverletOutputFormat=\"json,opencover\""
+          dotnet test ./src/Moq.Contrib.InOrder.sln --logger:trx --results-directory TestResults "/p:CollectCoverage=true" "/p:CoverletOutput=../TestResults/" "/p:CoverletOutputFormat=\"json,opencover\""
       - name: End Sonar scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Moq.InOrder
+namespace Moq.Contrib.InOrder
 {
     public interface IQueueComponent
     {
