@@ -46,9 +46,6 @@ jobs:
       - name: Test
         run: |
           dotnet test ./src/Moq.Contrib.InOrder.sln --logger:trx --results-directory TestResults "/p:CollectCoverage=true" "/p:CoverletOutput=../TestResults/" "/p:CoverletOutputFormat=\"json,opencover\""
-      - name: cat
-        run: |
-          cat src/TestResults/coverage.opencover.xml
       - name: End Sonar scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
