@@ -876,6 +876,43 @@ public class CallQueueTests
             .WithMessage("Expected x => x.EventHandler -= EventHandler exactly 1 time(s) but received it 0 time(s)");
     }
 
+    [Fact]
+    public void VerifyOrder_WithQueueOnDifferenThread_ShouldWorkCorrectly()
+    {
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
+        });
+
+        var called = new AutoResetEvent(false);
+
+        new Thread(() =>
+        {
+            var mock2 = new Mock<IDummy>();
+            var queue2 = CallQueue.Create(x0 =>
+            {
+                mock2.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+            });
+
+            mock2.Object.ExecuteAction(new DummyClass("b"));
+            called.Set();
+
+            queue2.VerifyOrder();
+        }).Start();
+
+        called.WaitOne();
+
+        mock.Object.ExecuteAction(new DummyClass("a"));
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
     public interface IDummy
     {
         public int MyProperty { get; set; }
