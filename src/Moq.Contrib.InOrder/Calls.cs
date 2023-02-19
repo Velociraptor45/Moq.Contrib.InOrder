@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Moq.InOrder
+namespace Moq.Contrib.InOrder
 {
     public class Calls : IEnumerable<Call>
     {

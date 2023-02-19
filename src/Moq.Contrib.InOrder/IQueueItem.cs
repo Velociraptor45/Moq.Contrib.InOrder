@@ -1,4 +1,4 @@
-﻿namespace Moq.InOrder
+﻿namespace Moq.Contrib.InOrder
 {
     internal interface IQueueItem
     {

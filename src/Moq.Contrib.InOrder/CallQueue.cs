@@ -1,11 +1,11 @@
-﻿using Moq.InOrder.Exceptions;
+﻿using Moq.Contrib.InOrder.Exceptions;
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Moq.InOrder.Tests")]
+[assembly: InternalsVisibleTo("Moq.Contrib.InOrder.Tests")]
 
-namespace Moq.InOrder
+namespace Moq.Contrib.InOrder
 {
     public class CallQueue : QueueComponenetBase
     {
