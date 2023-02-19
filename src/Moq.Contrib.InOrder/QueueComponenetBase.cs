@@ -6,8 +6,12 @@ namespace Moq.Contrib.InOrder
     public abstract class QueueComponenetBase : IQueueComponent
     {
         internal readonly List<IQueueItem> Items = new List<IQueueItem>();
-        public static CallQueue RootInstance { get; set; }
-        internal static IQueueComponent CurrentInstance { get; set; }
+
+        [ThreadStatic]
+        public static CallQueue RootInstance;
+
+        [ThreadStatic]
+        internal static IQueueComponent CurrentInstance;
 
         public Call RegisterCall(string callExpression, Times times)
         {
