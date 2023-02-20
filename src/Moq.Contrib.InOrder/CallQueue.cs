@@ -26,6 +26,10 @@ namespace Moq.Contrib.InOrder
             _receivedCalls.Add(call);
         }
 
+        /// <summary>
+        /// Verifies whether the received calls match exactly the order of the expected calls
+        /// </summary>
+        /// <exception cref="MoqOrderViolatedException">Thrown when received and expected call order is not equivalent</exception>
         public void VerifyOrder()
         {
             foreach (var item in Items)
