@@ -1,5 +1,6 @@
 ﻿using Moq.Contrib.InOrder.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -9,7 +10,9 @@ namespace Moq.Contrib.InOrder
 {
     public class CallQueue : QueueComponenetBase
     {
-        private readonly Calls _receivedCalls = new Calls();
+        private readonly Calls _unverifiedReceivedCalls = new Calls();
+        private readonly List<Call> _receivedCalls = new List<Call>();
+        public IReadOnlyCollection<Call> ReceivedCalls => _receivedCalls;
 
         public static CallQueue Create(Action<IQueueComponent> value)
         {
@@ -23,6 +26,7 @@ namespace Moq.Contrib.InOrder
 
         internal void ReceiveCall(Call call)
         {
+            _unverifiedReceivedCalls.Add(call);
             _receivedCalls.Add(call);
         }
 
@@ -34,12 +38,12 @@ namespace Moq.Contrib.InOrder
         {
             foreach (var item in Items)
             {
-                item.VerifyOrder(_receivedCalls);
+                item.VerifyOrder(_unverifiedReceivedCalls);
             }
 
-            if (_receivedCalls.Any())
+            if (_unverifiedReceivedCalls.Any())
                 throw new MoqOrderViolatedException(
-                    $"All setups satisfied but the following calls are remaining and missing a corresponding setup:{Environment.NewLine}{_receivedCalls.Expressions}");
+                    $"All setups satisfied but the following calls are remaining and missing a corresponding setup:{Environment.NewLine}{_unverifiedReceivedCalls.Expressions}");
         }
     }
 }

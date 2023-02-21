@@ -20,18 +20,18 @@ namespace Moq.Contrib.InOrder
             return call;
         }
 
-        public void RegisterLoop(Action<IQueueComponent> value)
+        public void RegisterLoop(Action<IQueueComponent> setups)
         {
-            RegisterLoop(value, Times.Once());
+            RegisterLoop(setups, Times.Once());
         }
 
-        public void RegisterLoop(Action<IQueueComponent> value, Times times)
+        public void RegisterLoop(Action<IQueueComponent> setups, Times times)
         {
             var loop = new Loop(times);
             Items.Add(loop);
             CurrentInstance = loop;
 
-            value(loop);
+            setups(loop);
 
             CurrentInstance = this;
         }

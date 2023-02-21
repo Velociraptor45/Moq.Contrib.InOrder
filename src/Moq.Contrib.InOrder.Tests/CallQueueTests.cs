@@ -913,6 +913,56 @@ public class CallQueueTests
         act.Should().NotThrow();
     }
 
+    [Fact]
+    public void VerifyOrder_WithCorrectCallsForSetup_ShouldNotRemoveItemsFromReceivedCallsProperty()
+    {
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
+            mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+        });
+
+        mock.Object.ExecuteAction(new DummyClass("a"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+
+        // Act
+        queue.VerifyOrder();
+
+        // Assert
+        queue.ReceivedCalls.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public void VerifyOrder_WithIncorrectCallsForSetup_ShouldNotRemoveItemsFromReceivedCallsProperty()
+    {
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
+            mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+        });
+
+        mock.Object.ExecuteAction(new DummyClass("a"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+
+        // Act
+        try
+        {
+            queue.VerifyOrder();
+        }
+        catch (Exception)
+        {
+            // swollow
+        }
+
+        // Assert
+        queue.ReceivedCalls.Should().HaveCount(3);
+    }
+
     public interface IDummy
     {
         public int MyProperty { get; set; }

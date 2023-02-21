@@ -4,9 +4,9 @@ namespace Moq.Contrib.InOrder
 {
     public interface IQueueComponent
     {
-        void RegisterLoop(Action<IQueueComponent> value);
+        void RegisterLoop(Action<IQueueComponent> setups);
 
-        void RegisterLoop(Action<IQueueComponent> value, Times times);
+        void RegisterLoop(Action<IQueueComponent> setups, Times times);
 
         Call RegisterCall(string callExpression, Times times);
     }
