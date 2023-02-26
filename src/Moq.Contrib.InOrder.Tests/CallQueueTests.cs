@@ -1,27 +1,96 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq.Contrib.InOrder.Exceptions;
 using Moq.Contrib.InOrder.Extensions;
+using Xunit.Abstractions;
 
 namespace Moq.Contrib.InOrder.Tests;
 
 public class CallQueueTests
 {
+    private readonly ILogger<CallQueue> _logger;
+
+    public CallQueueTests(ITestOutputHelper output)
+    {
+        _logger = output.BuildLoggerFor<CallQueue>();
+    }
+
+    [Fact]
+    public void SetupOutsideOfCallQueue_ShouldNotThrow()
+    {
+        var mock = new Mock<IDummy>();
+
+        mock.SetupInOrder(x => x.ExecuteAction("a"));
+        mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
+        mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
+        mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+
+        // Act
+        Action act = () =>
+        {
+            mock.Object.ExecuteAction("a");
+            mock.Object.ExecuteAction(new DummyClass("x"));
+
+            mock.Object.ExecuteAction(new DummyClass("y"));
+            mock.Object.ExecuteAction(new DummyClass("b"));
+
+            mock.Object.ExecuteAction(new DummyClass("y"));
+            mock.Object.ExecuteAction(new DummyClass("b"));
+        };
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_CallsAndMultiLoop_ValidCalls_WithoutLogger_ShouldNotThrow()
+    {
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+            {
+                mock.SetupInOrder(x => x.ExecuteAction("a"));
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
+
+                x0.RegisterLoop(_ =>
+                {
+                    mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
+                    mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+                }, Times.Exactly(2));
+            });
+
+        mock.Object.ExecuteAction("a");
+        mock.Object.ExecuteAction(new DummyClass("x"));
+
+        mock.Object.ExecuteAction(new DummyClass("y"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+
+        mock.Object.ExecuteAction(new DummyClass("y"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
     [Fact]
     public void VerifyOrder_CallsAndMultiLoop_ValidCalls_ShouldNotThrow()
     {
         var mock = new Mock<IDummy>();
 
         var queue = CallQueue.Create(x0 =>
-        {
-            mock.SetupInOrder(x => x.ExecuteAction("a"));
-            mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
-
-            x0.RegisterLoop(x1 =>
             {
-                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
-                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
-            }, Times.Exactly(2));
-        });
+                mock.SetupInOrder(x => x.ExecuteAction("a"));
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
+
+                x0.RegisterLoop(_ =>
+                {
+                    mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
+                    mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+                }, Times.Exactly(2));
+            }, _logger);
 
         mock.Object.ExecuteAction("a");
         mock.Object.ExecuteAction(new DummyClass("x"));
@@ -55,7 +124,7 @@ public class CallQueueTests
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
             }, Times.Exactly(2));
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction("a");
         mock.Object.ExecuteAction(new DummyClass("x"));
@@ -79,12 +148,12 @@ public class CallQueueTests
 
         var queue = CallQueue.Create(x0 =>
         {
-            x0.RegisterLoop(x1 =>
+            x0.RegisterLoop(_ =>
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
             }, Times.Once());
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("y"));
         mock.Object.ExecuteAction(new DummyClass("b"));
@@ -108,12 +177,12 @@ public class CallQueueTests
 
         var queue = CallQueue.Create(x0 =>
         {
-            x0.RegisterLoop(x1 =>
+            x0.RegisterLoop(_ =>
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
             }, Times.Once());
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("y"));
         mock.Object.ExecuteAction(new DummyClass("b"));
@@ -140,12 +209,12 @@ public class CallQueueTests
 
         var queue = CallQueue.Create(x0 =>
         {
-            x0.RegisterLoop(x1 =>
+            x0.RegisterLoop(_ =>
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
             }, Times.AtLeast(atLeaseExpectedLoopCount));
-        });
+        }, _logger);
 
         for (int i = 0; i < actualLoopCount; i++)
         {
@@ -168,12 +237,12 @@ public class CallQueueTests
 
         var queue = CallQueue.Create(x0 =>
         {
-            x0.RegisterLoop(x1 =>
+            x0.RegisterLoop(_ =>
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
             }, Times.AtLeast(2));
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("a"));
         mock.Object.ExecuteAction(new DummyClass("b"));
@@ -187,6 +256,7 @@ public class CallQueueTests
     }
 
     [Theory]
+    [InlineData(2, 0)]
     [InlineData(2, 1)]
     [InlineData(2, 2)]
     public void VerifyOrder_LoopAtMostCount_MeetExpectedCount_ShouldNotThrow(int atMostExpectedLoopCount,
@@ -197,12 +267,12 @@ public class CallQueueTests
 
         var queue = CallQueue.Create(x0 =>
         {
-            x0.RegisterLoop(x1 =>
+            x0.RegisterLoop(_ =>
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
             }, Times.AtMost(atMostExpectedLoopCount));
-        });
+        }, _logger);
 
         for (int i = 0; i < actualLoopCount; i++)
         {
@@ -225,12 +295,12 @@ public class CallQueueTests
 
         var queue = CallQueue.Create(x0 =>
         {
-            x0.RegisterLoop(x1 =>
+            x0.RegisterLoop(_ =>
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
             }, Times.AtMost(1));
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("a"));
         mock.Object.ExecuteAction(new DummyClass("b"));
@@ -259,13 +329,13 @@ public class CallQueueTests
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
 
-                x1.RegisterLoop(x1 =>
+                x1.RegisterLoop(_ =>
                 {
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
                 });
             });
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("x"));
         mock.Object.ExecuteAction(new DummyClass("y"));
@@ -293,13 +363,13 @@ public class CallQueueTests
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
 
-                x1.RegisterLoop(x1 =>
+                x1.RegisterLoop(_ =>
                 {
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
                 });
             });
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("y"));
 
@@ -322,18 +392,18 @@ public class CallQueueTests
 
         var queue = CallQueue.Create(q =>
         {
-            q.RegisterLoop(x1 =>
+            q.RegisterLoop(_ =>
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
 
-                q.RegisterLoop(x1 =>
+                q.RegisterLoop(_ =>
                 {
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
                 }, Times.Exactly(2));
             }, Times.Exactly(2));
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("x"));
         mock.Object.ExecuteAction(new DummyClass("y"));
@@ -365,13 +435,13 @@ public class CallQueueTests
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
 
-                x1.RegisterLoop(x1 =>
+                x1.RegisterLoop(_ =>
                 {
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
                 });
             });
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("x"));
         mock.Object.ExecuteAction(new DummyClass("y"));
@@ -394,11 +464,11 @@ public class CallQueueTests
 
         var queue = CallQueue.Create(x0 =>
         {
-            x0.RegisterLoop(x1 =>
+            x0.RegisterLoop(_ =>
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
             });
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("x"));
 
@@ -416,11 +486,11 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
             mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("x"));
         mock.Object.ExecuteAction(new DummyClass("y"));
@@ -445,12 +515,12 @@ public class CallQueueTests
         {
             mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
 
-            x0.RegisterLoop(x1 =>
+            x0.RegisterLoop(_ =>
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
             });
-        });
+        }, _logger);
 
         // Assert
         act.Should().NotThrow();
@@ -462,10 +532,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupGetInOrder(x => x.MyProperty).Returns(5);
-        });
+        }, _logger);
 
         _ = mock.Object.MyProperty;
 
@@ -482,10 +552,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupGetInOrder(x => x.MyProperty, Times.Exactly(2)).Returns(5);
-        });
+        }, _logger);
 
         _ = mock.Object.MyProperty;
         _ = mock.Object.MyProperty;
@@ -503,10 +573,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupGetInOrder(x => x.MyProperty).Returns(5);
-        });
+        }, _logger);
 
         _ = mock.Object.MyProperty;
         _ = mock.Object.MyProperty;
@@ -525,10 +595,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupGetInOrder(x => x.MyProperty).Returns(5);
-        });
+        }, _logger);
 
         mock.Object.MyProperty = 5;
 
@@ -546,10 +616,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupSetInOrder(x => x.MyProperty = 5);
-        });
+        }, _logger);
 
         mock.Object.MyProperty = 5;
 
@@ -566,10 +636,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupSetInOrder(x => x.MyProperty = 5, Times.Exactly(2));
-        });
+        }, _logger);
 
         mock.Object.MyProperty = 5;
         mock.Object.MyProperty = 5;
@@ -587,10 +657,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupSetInOrder(x => x.MyProperty = 5);
-        });
+        }, _logger);
 
         mock.Object.MyProperty = 5;
         mock.Object.MyProperty = 5;
@@ -609,10 +679,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupSetInOrder(x => x.MyProperty = 5);
-        });
+        }, _logger);
 
         _ = mock.Object.MyProperty;
 
@@ -630,10 +700,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupSetInOrder<IDummy, int>(x => x.MyProperty = 5);
-        });
+        }, _logger);
 
         mock.Object.MyProperty = 5;
 
@@ -650,10 +720,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupSetInOrder<IDummy, int>(x => x.MyProperty = 5, Times.Exactly(2));
-        });
+        }, _logger);
 
         mock.Object.MyProperty = 5;
         mock.Object.MyProperty = 5;
@@ -671,10 +741,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupSetInOrder<IDummy, int>(x => x.MyProperty = 5);
-        });
+        }, _logger);
 
         mock.Object.MyProperty = 5;
         mock.Object.MyProperty = 5;
@@ -693,10 +763,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupSetInOrder<IDummy, int>(x => x.MyProperty = 5);
-        });
+        }, _logger);
 
         _ = mock.Object.MyProperty;
 
@@ -714,10 +784,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupAddInOrder(x => x.EventHandler += DummyClass.DummyMethod);
-        });
+        }, _logger);
 
         mock.Object.EventHandler += DummyClass.DummyMethod;
 
@@ -734,10 +804,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupAddInOrder(x => x.EventHandler += DummyClass.DummyMethod, Times.Exactly(2));
-        });
+        }, _logger);
 
         mock.Object.EventHandler += DummyClass.DummyMethod;
         mock.Object.EventHandler += DummyClass.DummyMethod;
@@ -755,10 +825,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupAddInOrder(x => x.EventHandler += DummyClass.DummyMethod);
-        });
+        }, _logger);
 
         mock.Object.EventHandler += DummyClass.DummyMethod;
         mock.Object.EventHandler += DummyClass.DummyMethod;
@@ -777,10 +847,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupAddInOrder(x => x.EventHandler += DummyClass.DummyMethod);
-        });
+        }, _logger);
 
         mock.Object.EventHandler -= DummyClass.DummyMethod;
 
@@ -798,10 +868,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupRemoveInOrder(x => x.EventHandler -= DummyClass.DummyMethod);
-        });
+        }, _logger);
 
         mock.Object.EventHandler -= DummyClass.DummyMethod;
 
@@ -818,10 +888,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupRemoveInOrder(x => x.EventHandler -= DummyClass.DummyMethod, Times.Exactly(2));
-        });
+        }, _logger);
 
         mock.Object.EventHandler -= DummyClass.DummyMethod;
         mock.Object.EventHandler -= DummyClass.DummyMethod;
@@ -839,10 +909,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupRemoveInOrder(x => x.EventHandler -= DummyClass.DummyMethod);
-        });
+        }, _logger);
 
         mock.Object.EventHandler -= DummyClass.DummyMethod;
         mock.Object.EventHandler -= DummyClass.DummyMethod;
@@ -861,10 +931,10 @@ public class CallQueueTests
         // Arrange
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupRemoveInOrder(x => x.EventHandler -= DummyClass.DummyMethod);
-        });
+        }, _logger);
 
         mock.Object.EventHandler += DummyClass.DummyMethod;
 
@@ -877,21 +947,21 @@ public class CallQueueTests
     }
 
     [Fact]
-    public void VerifyOrder_WithQueueOnDifferenThread_ShouldWorkCorrectly()
+    public void VerifyOrder_WithQueueOnDifferentThread_ShouldWorkCorrectly()
     {
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
-        });
+        }, _logger);
 
         var called = new AutoResetEvent(false);
 
         new Thread(() =>
         {
             var mock2 = new Mock<IDummy>();
-            var queue2 = CallQueue.Create(x0 =>
+            var queue2 = CallQueue.Create(_ =>
             {
                 mock2.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
             });
@@ -918,11 +988,11 @@ public class CallQueueTests
     {
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
             mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("a"));
         mock.Object.ExecuteAction(new DummyClass("b"));
@@ -939,11 +1009,11 @@ public class CallQueueTests
     {
         var mock = new Mock<IDummy>();
 
-        var queue = CallQueue.Create(x0 =>
+        var queue = CallQueue.Create(_ =>
         {
             mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
             mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
-        });
+        }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("a"));
         mock.Object.ExecuteAction(new DummyClass("b"));
@@ -956,7 +1026,7 @@ public class CallQueueTests
         }
         catch (Exception)
         {
-            // swollow
+            // swallow
         }
 
         // Assert

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Moq.Contrib.InOrder
 {
-    internal class Loop : QueueComponenetBase, IQueueItem
+    internal class Loop : QueueComponentBase, IQueueItem
     {
         private readonly Times _times;
 

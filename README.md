@@ -90,3 +90,50 @@ var queue = CallQueue.Create(q =>
     });
 });
 ```
+
+## Logging
+Optionally, you can pass an `ILogger<CallQueue>` into `CallQueue.Create` that will log the expected and received calls.
+
+```c#
+var mock = new Mock<IDummy>();
+var queue = CallQueue.Create(x0 =>
+    {
+        mock.SetupInOrder(x => x.ExecuteAction("a"));
+        mock.SetupInOrder(x => x.ExecuteAction("b"), Times.AtLeast(2));
+
+        x0.RegisterLoop(_ =>
+        {
+            mock.SetupInOrder(x => x.ExecuteAction("c"));
+            mock.SetupInOrder(x => x.ExecuteAction("d"));
+        }, Times.Exactly(2));
+    },
+    _logger);
+
+mock.Object.ExecuteAction("a");
+mock.Object.ExecuteAction("b");
+mock.Object.ExecuteAction("b");
+
+mock.Object.ExecuteAction("c");
+mock.Object.ExecuteAction("d");
+
+mock.Object.ExecuteAction("c");
+mock.Object.ExecuteAction("d");
+```
+Producing the following output:
+```
+Information [0]: Expected Calls:
+Information [0]: 	x => x.ExecuteAction("a")
+Information [0]: 	(>2 times) x => x.ExecuteAction("b")
+Information [0]: 	Loop: (2 times) 
+Information [0]: 		x => x.ExecuteAction("c")
+Information [0]: 		x => x.ExecuteAction("d")
+Information [0]: ----------------------------
+Information [0]: Received Calls:
+Information [0]: 	x => x.ExecuteAction("a")
+Information [0]: 	x => x.ExecuteAction("b")
+Information [0]: 	x => x.ExecuteAction("b")
+Information [0]: 	x => x.ExecuteAction("c")
+Information [0]: 	x => x.ExecuteAction("d")
+Information [0]: 	x => x.ExecuteAction("c")
+Information [0]: 	x => x.ExecuteAction("d")
+```
