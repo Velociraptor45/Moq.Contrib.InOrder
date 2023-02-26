@@ -86,8 +86,8 @@ var queue = CallQueue.Create(q =>
         {
             mock.SetupInOrder(x => x.ExecuteAction("e"));
             mock.SetupInOrder(x => x.ExecuteAction("f"));
-        });
-    });
+        }, Times.AtLeast(2));
+    }, Times.AtMost(2));
 });
 ```
 

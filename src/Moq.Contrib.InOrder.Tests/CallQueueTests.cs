@@ -333,8 +333,8 @@ public class CallQueueTests
                 {
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
-                });
-            });
+                }, Times.AtMost(2));
+            }, Times.AtMost(2));
         }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("x"));
@@ -367,8 +367,8 @@ public class CallQueueTests
                 {
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
-                });
-            });
+                }, Times.AtLeast(1));
+            }, Times.AtLeast(1));
         }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("y"));
@@ -381,7 +381,7 @@ public class CallQueueTests
 
         // Assert
         act.Should().Throw<MoqOrderViolatedException>().WithMessage(
-            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"x\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nexactly 1 time(s) but received it 0 time(s)");
+            "Expected loop\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"x\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"y\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"a\").S)),\r\nx => x.ExecuteAction(It.Is<CallQueueTests.DummyClass>(c => c.S == new CallQueueTests.DummyClass(\"b\").S))\r\nbetween 1 and 2147483647 time(s) but received it 0 time(s)");
     }
 
     [Fact]
@@ -439,8 +439,8 @@ public class CallQueueTests
                 {
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)));
                     mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
-                });
-            });
+                }, Times.AtMost(2));
+            }, Times.AtMost(2));
         }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("x"));
@@ -467,7 +467,7 @@ public class CallQueueTests
             x0.RegisterLoop(_ =>
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
-            });
+            }, Times.AtMost(2));
         }, _logger);
 
         mock.Object.ExecuteAction(new DummyClass("x"));
@@ -519,7 +519,7 @@ public class CallQueueTests
             {
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
                 mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
-            });
+            }, Times.AtMost(2));
         }, _logger);
 
         // Assert

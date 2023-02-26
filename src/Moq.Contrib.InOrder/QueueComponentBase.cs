@@ -36,11 +36,6 @@ namespace Moq.Contrib.InOrder
             return call;
         }
 
-        public void RegisterLoop(Action<IQueueComponent> setups)
-        {
-            RegisterLoop(setups, Times.Once());
-        }
-
         public void RegisterLoop(Action<IQueueComponent> setups, Times times)
         {
             var loop = new Loop(times);
