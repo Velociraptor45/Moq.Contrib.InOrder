@@ -1,6 +1,6 @@
 # Moq.Contrib.InOrder
 
-![Nuget](https://img.shields.io/nuget/dt/Moq.Contrib.InOrder?color=blue&label=NuGet)
+[![Nuget](https://img.shields.io/nuget/dt/Moq.Contrib.InOrder?color=blue&label=NuGet)](https://www.nuget.org/packages/Moq.Contrib.InOrder)
 
 Moq.Contrib.InOrder is a library for ensuring that mock methods are called in correct order while strictly separating the acting & verification phase.
 
