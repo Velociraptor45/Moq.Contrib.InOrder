@@ -16,6 +16,66 @@ public class CallQueueTests
     }
 
     [Fact]
+    public void SetupOutsideOfCallQueue_ShouldNotThrow()
+    {
+        var mock = new Mock<IDummy>();
+
+        mock.SetupInOrder(x => x.ExecuteAction("a"));
+        mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
+        mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
+        mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+
+        // Act
+        Action act = () =>
+        {
+            mock.Object.ExecuteAction("a");
+            mock.Object.ExecuteAction(new DummyClass("x"));
+
+            mock.Object.ExecuteAction(new DummyClass("y"));
+            mock.Object.ExecuteAction(new DummyClass("b"));
+
+            mock.Object.ExecuteAction(new DummyClass("y"));
+            mock.Object.ExecuteAction(new DummyClass("b"));
+        };
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void VerifyOrder_CallsAndMultiLoop_ValidCalls_WithoutLogger_ShouldNotThrow()
+    {
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+            {
+                mock.SetupInOrder(x => x.ExecuteAction("a"));
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("x").S)));
+
+                x0.RegisterLoop(_ =>
+                {
+                    mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("y").S)));
+                    mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("b").S)));
+                }, Times.Exactly(2));
+            });
+
+        mock.Object.ExecuteAction("a");
+        mock.Object.ExecuteAction(new DummyClass("x"));
+
+        mock.Object.ExecuteAction(new DummyClass("y"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+
+        mock.Object.ExecuteAction(new DummyClass("y"));
+        mock.Object.ExecuteAction(new DummyClass("b"));
+
+        // Act
+        Action act = () => queue.VerifyOrder();
+
+        // Assert
+        act.Should().NotThrow();
+    }
+
+    [Fact]
     public void VerifyOrder_CallsAndMultiLoop_ValidCalls_ShouldNotThrow()
     {
         var mock = new Mock<IDummy>();
