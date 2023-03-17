@@ -69,7 +69,7 @@ namespace Moq.Contrib.InOrder
             }
 
             if (max == int.MaxValue)
-                return $"(>{min} times) ";
+                return $"(>={min} times) ";
 
             return $"({min} - {max} times) ";
         }
