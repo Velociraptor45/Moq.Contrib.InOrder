@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <Title>Moq.Contrib.InOrder</Title>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>David Krammer</Authors>
     <Company />
     <Copyright></Copyright>
