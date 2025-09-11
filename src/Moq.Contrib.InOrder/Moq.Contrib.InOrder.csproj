@@ -2,11 +2,12 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
     <Title>Moq.Contrib.InOrder</Title>
     <Version>1.0.2</Version>
     <Authors>David Krammer</Authors>
     <Company />
-    <Copyright></Copyright>
     <Description>Ensures that mock calls are executed in the correct order. Check out the GitHub repository for more information &amp; examples</Description>
     <RepositoryUrl>https://github.com/Velociraptor45/Moq.Contrib.InOrder</RepositoryUrl>
     <PackageTags>moq; mock;</PackageTags>
@@ -19,6 +20,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
     <PackageReference Include="Moq" Version="4.18.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="xunit.v3.core">
+      <HintPath>..\..\..\..\.nuget\packages\xunit.v3.extensibility.core\3.0.0\lib\netstandard2.0\xunit.v3.core.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
