@@ -5,7 +5,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <Title>Moq.Contrib.InOrder</Title>
-    <Version>1.0.2</Version>
+    <Version>2.0.0-alpha.1</Version>
     <Authors>David Krammer</Authors>
     <Company />
     <Description>Ensures that mock calls are executed in the correct order. Check out the GitHub repository for more information &amp; examples</Description>
