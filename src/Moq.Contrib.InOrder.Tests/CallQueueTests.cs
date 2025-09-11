@@ -2,7 +2,6 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq.Contrib.InOrder.Exceptions;
 using Moq.Contrib.InOrder.Extensions;
-using Xunit.Abstractions;
 
 namespace Moq.Contrib.InOrder.Tests;
 
