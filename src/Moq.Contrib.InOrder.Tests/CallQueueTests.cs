@@ -1064,7 +1064,7 @@ public class CallQueueTests
     }
 
     [Fact]
-    public void VerifyOrder_WithAdditionalInvocation_ShouldThrow()
+    public void VerifyOrder_WithAdditionalInvocationOnDifferentMethod_ShouldThrow()
     {
         var mock = new Mock<IDummy>();
 
@@ -1077,6 +1077,28 @@ public class CallQueueTests
 
         mock.Object.ExecuteAction(new DummyClass("a")); // expected
         mock.Object.ExecuteAction("a"); // unexpected
+
+        // Act
+        var func = () => queue.VerifyOrder();
+
+        // Assert
+        func.Should().ThrowExactly<UnexpectedMoqInvocationException>();
+    }
+
+    [Fact]
+    public void VerifyOrder_WithAdditionalInvocationOnSameMethod_ShouldThrow()
+    {
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue
+            .Create(x0 =>
+            {
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)), x0);
+            }, _logger)
+            .PreventAllOtherInvocationsOf(mock);
+
+        mock.Object.ExecuteAction(new DummyClass("a")); // expected
+        mock.Object.ExecuteAction(new DummyClass("b")); // unexpected
 
         // Act
         var func = () => queue.VerifyOrder();
