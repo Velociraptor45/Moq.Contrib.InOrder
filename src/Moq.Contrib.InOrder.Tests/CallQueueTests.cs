@@ -1043,7 +1043,60 @@ public class CallQueueTests
         queue.ReceivedCalls.Should().HaveCount(3);
     }
 
+    [Fact]
+    public void VerifyOrder_WithInvocationOnWrongMock_ShouldThrow()
+    {
+        var mock = new Mock<IDummy>();
+        var mock2 = new Mock<IDummy>();
+
+        var queue = CallQueue.Create(x0 =>
+        {
+            mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)), x0);
+        }, _logger);
+
+        mock2.Object.ExecuteAction(new DummyClass("a"));
+
+        // Act
+        var func = () => queue.VerifyOrder();
+
+        // Assert
+        func.Should().ThrowExactly<MoqOrderViolatedException>();
+    }
+
+    [Fact]
+    public void VerifyOrder_WithAdditionalInvocation_ShouldThrow()
+    {
+        var mock = new Mock<IDummy>();
+
+        var queue = CallQueue
+            .Create(x0 =>
+            {
+                mock.SetupInOrder(x => x.ExecuteAction(It.Is<DummyClass>(c => c.S == new DummyClass("a").S)), x0);
+            }, _logger)
+            .PreventAllOtherInvocationsOf(mock);
+
+        mock.Object.ExecuteAction(new DummyClass("a")); // expected
+        mock.Object.ExecuteAction("a"); // unexpected
+
+        // Act
+        var func = () => queue.VerifyOrder();
+
+        // Assert
+        func.Should().ThrowExactly<UnexpectedMoqInvocationException>();
+    }
+
     public interface IDummy
+    {
+        public int MyProperty { get; set; }
+
+        public event EventHandler EventHandler;
+
+        void ExecuteAction(string s);
+
+        void ExecuteAction(DummyClass c);
+    }
+
+    public interface IDummy2
     {
         public int MyProperty { get; set; }
 

@@ -13,11 +13,12 @@ namespace Moq.Contrib.InOrder
     {
         private readonly Calls _unverifiedReceivedCalls = new();
         private readonly List<Call> _receivedCalls = new();
+        private readonly List<IInvocationList> _preventedInvocationMocks = [];
         public IReadOnlyCollection<Call> ReceivedCalls => _receivedCalls;
 
         internal override string? LoggingIndentation { get; }
         public override IQueueComponent? Parent => null;
-        public ILogger<CallQueue>? Logger { get; }
+        internal ILogger<CallQueue>? Logger { get; }
 
         private CallQueue(ILogger<CallQueue>? logger)
         {
@@ -43,6 +44,12 @@ namespace Moq.Contrib.InOrder
 
             return queue;
         }
+        
+        public CallQueue PreventAllOtherInvocationsOf(params Mock[] mock)
+        {
+            _preventedInvocationMocks.AddRange(mock.Select(m => m.Invocations));
+            return this;
+        }
 
         internal void ReceiveCall(Call call)
         {
@@ -65,6 +72,13 @@ namespace Moq.Contrib.InOrder
             if (_unverifiedReceivedCalls.Any())
                 throw new MoqOrderViolatedException(
                     $"All setups satisfied but the following calls are remaining and missing a corresponding setup:{Environment.NewLine}{_unverifiedReceivedCalls.Expressions}");
+
+            var allOtherCalls = _preventedInvocationMocks
+                .SelectMany(i => i.Select(x => x))
+                .Where(c => c.MatchingSetup is not null)
+                .ToList();
+            if (allOtherCalls.Count > 0)
+                throw new UnexpectedMoqInvocationException(allOtherCalls.Select(c => c.ToString()!));
         }
     }
 }

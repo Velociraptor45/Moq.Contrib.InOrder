@@ -18,7 +18,7 @@ namespace Moq.Contrib.InOrder.Extensions
             var setup = mock.Setup(expression);
             if (component is not null)
             {
-                var call = component.RegisterCall(setup.ToString(), times);
+                var call = component.RegisterCall(mock.Name, setup.ToString(), times);
                 setup.Callback(() => component.GetRoot().ReceiveCall(call));
             }
             return setup;
@@ -36,7 +36,7 @@ namespace Moq.Contrib.InOrder.Extensions
             var setup = mock.Setup(expression);
             if (component is not null)
             {
-                var call = component.RegisterCall(setup.ToString(), times);
+                var call = component.RegisterCall(mock.Name, setup.ToString(), times);
                 setup.Callback(() => component.GetRoot().ReceiveCall(call));
             }
             return setup;
@@ -54,7 +54,7 @@ namespace Moq.Contrib.InOrder.Extensions
             var setup = mock.SetupGet(expression);
             if (component is not null)
             {
-                var call = component.RegisterCall(setup.ToString(), times);
+                var call = component.RegisterCall(mock.Name, setup.ToString(), times);
                 setup.Callback(() => component.GetRoot().ReceiveCall(call));
             }
             return setup;
@@ -72,7 +72,7 @@ namespace Moq.Contrib.InOrder.Extensions
             var setup = mock.SetupSet<TProperty>(expression);
             if (component is not null)
             {
-                var call = component.RegisterCall(setup.ToString(), times);
+                var call = component.RegisterCall(mock.Name, setup.ToString(), times);
                 setup.Callback(p => component.GetRoot().ReceiveCall(call));
             }
             return setup;
@@ -90,7 +90,7 @@ namespace Moq.Contrib.InOrder.Extensions
             var setup = mock.SetupSet(expression);
             if (component is not null)
             {
-                var call = component.RegisterCall(setup.ToString(), times);
+                var call = component.RegisterCall(mock.Name, setup.ToString(), times);
                 setup.Callback(() => component.GetRoot().ReceiveCall(call));
             }
             return setup;
@@ -108,7 +108,7 @@ namespace Moq.Contrib.InOrder.Extensions
             var setup = mock.SetupAdd(expression);
             if (component is not null)
             {
-                var call = component.RegisterCall(setup.ToString(), times);
+                var call = component.RegisterCall(mock.Name, setup.ToString(), times);
                 setup.Callback(() => component.GetRoot().ReceiveCall(call));
             }
             return setup;
@@ -126,7 +126,7 @@ namespace Moq.Contrib.InOrder.Extensions
             var setup = mock.SetupRemove(expression);
             if (component is not null)
             {
-                var call = component.RegisterCall(setup.ToString(), times);
+                var call = component.RegisterCall(mock.Name, setup.ToString(), times);
                 setup.Callback(() => component.GetRoot().ReceiveCall(call));
             }
             return setup;
