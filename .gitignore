@@ -11,3 +11,5 @@ obj/
 # logs
 **/[Ll]ogs/
 **/[Ll]og/
+
+**/.idea/
