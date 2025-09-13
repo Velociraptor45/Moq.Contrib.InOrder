@@ -8,7 +8,7 @@ namespace Moq.Contrib.InOrder
 
         void RegisterLoop(Action<IQueueComponent> setups, Times times);
 
-        Call RegisterCall(string callExpression, Times times);
+        Call RegisterCall(string mockClassName, string callExpression, Times times);
 
         CallQueue GetRoot();
     }

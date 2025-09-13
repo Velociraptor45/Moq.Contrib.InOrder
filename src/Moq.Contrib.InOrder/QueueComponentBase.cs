@@ -11,9 +11,9 @@ namespace Moq.Contrib.InOrder
         internal abstract string? LoggingIndentation { get; }
         public abstract IQueueComponent? Parent { get; }
 
-        public Call RegisterCall(string callExpression, Times times)
+        public Call RegisterCall(string mockClassName, string callExpression, Times times)
         {
-            var call = new Call(callExpression, times);
+            var call = new Call(mockClassName, callExpression, times);
             Items.Add(call);
 
             Log($"{GetTimesLogging(times)}{callExpression}");
@@ -31,7 +31,6 @@ namespace Moq.Contrib.InOrder
             Log($"Loop: {GetTimesLogging(times)}");
 
             setups(loop);
-
         }
 
         private static string GetTimesLogging(Times times)

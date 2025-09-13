@@ -1,25 +1,16 @@
-﻿using Moq.Contrib.InOrder.Exceptions;
+﻿using System.ComponentModel;
+using Moq.Contrib.InOrder.Exceptions;
 using System.Diagnostics;
 using System.Linq;
 
 namespace Moq.Contrib.InOrder
 {
     [DebuggerDisplay("{Expression}")]
-    public class Call : IQueueItem
+    public record Call(string MockClassName, string Expression, Times Times) : IQueueItem
     {
-        private readonly Times _times;
-
-        public Call(string expression, Times times)
-        {
-            Expression = expression;
-            _times = times;
-        }
-
-        public string Expression { get; }
-
         public void VerifyOrder(Calls callQueue)
         {
-            var (min, max) = _times;
+            var (min, max) = Times;
             var actualCount = 0;
 
             while (callQueue.Any())
@@ -48,4 +39,11 @@ namespace Moq.Contrib.InOrder
             return call == this;
         }
     }
+}
+
+// this fixes an "IsExternalInit is not defined" error in the compiler
+namespace System.Runtime.CompilerServices
+{
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal class IsExternalInit{}
 }

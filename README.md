@@ -93,6 +93,24 @@ var queue = CallQueue.Create(q =>
 });
 ```
 
+## Other Invocations
+For everyone using loose mocks, it's possible to make sure that no other invocations were performed on the mock via the `PreventAllOtherInvocationsOf` method
+
+```c#
+var mock = new Mock<IDummy>(MockBehavior.Loose);
+var queue = CallQueue
+    .Create(q =>
+    {
+        mock.SetupInOrder(x => x.ExecuteAction("a"), q);
+    })
+    .PreventAllOtherInvocationsOf(mock);
+
+mock.Object.ExecuteAction("a");
+mock.Object.ExecuteAction("b");
+
+queue.VerifyOrder(); // will throw due to 'ExecuteAction("b")' call
+```
+
 ## Logging
 Optionally, you can pass an `ILogger<CallQueue>` into `CallQueue.Create` that will log the expected and received calls.
 
