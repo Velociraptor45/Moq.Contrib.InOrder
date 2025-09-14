@@ -20,6 +20,8 @@ namespace Moq.Contrib.InOrder
         public override IQueueComponent? Parent => null;
         internal ILogger<CallQueue>? Logger { get; }
 
+        public static CallQueue Empty => Create(_ => { });
+        
         private CallQueue(ILogger<CallQueue>? logger)
         {
             Logger = logger;
