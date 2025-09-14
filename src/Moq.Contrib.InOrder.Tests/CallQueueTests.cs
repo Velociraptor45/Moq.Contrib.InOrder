@@ -1118,17 +1118,6 @@ public class CallQueueTests
         void ExecuteAction(DummyClass c);
     }
 
-    public interface IDummy2
-    {
-        public int MyProperty { get; set; }
-
-        public event EventHandler EventHandler;
-
-        void ExecuteAction(string s);
-
-        void ExecuteAction(DummyClass c);
-    }
-
     public class DummyClass
     {
         public DummyClass(string s)
