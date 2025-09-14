@@ -1107,6 +1107,17 @@ public class CallQueueTests
         func.Should().ThrowExactly<UnexpectedMoqInvocationException>();
     }
 
+    [Fact]
+    public void Empty_ShouldReturnEmptyCallQueue()
+    {
+        // Act
+        var queue = CallQueue.Empty;
+
+        // Assert
+        var verify = () => queue.VerifyOrder();
+        verify.Should().NotThrow();
+    }
+
     public interface IDummy
     {
         public int MyProperty { get; set; }
