@@ -2,7 +2,7 @@
 
 namespace Moq.Contrib.InOrder.Exceptions
 {
-    public class MoqOrderViolatedException : Exception
+    public class MoqOrderViolatedException : MoqException
     {
         public MoqOrderViolatedException(string message) : base(message)
         {

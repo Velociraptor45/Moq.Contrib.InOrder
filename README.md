@@ -2,6 +2,8 @@
 
 [![Nuget](https://img.shields.io/nuget/dt/Moq.Contrib.InOrder?color=blue&label=NuGet)](https://www.nuget.org/packages/Moq.Contrib.InOrder)
 
+> **For docs & instructions on the latest stable release, switch to *main* branch please**
+
 Moq.Contrib.InOrder is a library for ensuring that mock methods are called in correct order while strictly separating the acting & verification phase.
 
 Register all mock setups that should be taken into account when verifying the call order in a `var queue = CallQueue.Create(x => { /* here */});`. To mark a mock method as relevant for order verification, use `.SetupInOrder(...)` instead of the normal `.Setup(...)` provided by moq (for every of moq's `Setup` methods, there is an `InOrder` version, e.g. `SetupGetInOrder`, `SetupAddInOrder`, etc).
@@ -12,12 +14,12 @@ Verify the call order after executing your test method by `queue.VerifyOrder()`.
 ``` c#
 // Arrange
 var mock = new Mock<IDummy>();
-var sut = new TestedDummyClass(mock);
+var sut = new TestedDummyClass(mock.Object);
 
-var queue = CallQueue.Create(q =>
+var queue = CallQueue.Create(x0 =>
 {
-    mock.SetupInOrder(x => x.ExecuteAction("a"));
-    mock.SetupInOrder(x => x.ExecuteAction("b"));
+    mock.SetupInOrder(x => x.ExecuteAction("a"), x0);
+    mock.SetupInOrder(x => x.ExecuteAction("b"), x0);
 });
 
 // Act
@@ -38,18 +40,18 @@ To define a loop for multiple setups, use `.RegisterLoop(...)`. To define a loop
 ``` c#
 // Arrange
 var mock = new Mock<IDummy>();
-var sut = new TestedDummyClass(mock);
+var sut = new TestedDummyClass(mock.Object);
 
-var queue = CallQueue.Create(q =>
+var queue = CallQueue.Create(x0 =>
 {
-    mock.SetupInOrder(x => x.ExecuteAction("a"));
-    mock.SetupInOrder(x => x.ExecuteAction("b"), Times.Exactly(3));
+    mock.SetupInOrder(x => x.ExecuteAction("a"), x0);
+    mock.SetupInOrder(x => x.ExecuteAction("b"), Times.Exactly(3), x0);
 
-    q.RegisterLoop(_ =>
+    q.RegisterLoop(x1 =>
     {
         // these two methods should be called in a loop which is expected to execute twice
-        mock.SetupInOrder(x => x.ExecuteAction("c"));
-        mock.SetupInOrder(x => x.ExecuteAction("d"));
+        mock.SetupInOrder(x => x.ExecuteAction("c"), x1);
+        mock.SetupInOrder(x => x.ExecuteAction("d"), x1);
     }, Times.Exactly(2));
 });
 
@@ -79,16 +81,34 @@ var queue = CallQueue.Create(q =>
 {
     q.RegisterLoop(loop =>
     {
-        mock.SetupInOrder(x => x.ExecuteAction("c"));
-        mock.SetupInOrder(x => x.ExecuteAction("d"));
+        mock.SetupInOrder(x => x.ExecuteAction("c"), loop);
+        mock.SetupInOrder(x => x.ExecuteAction("d"), loop);
 
-        loop.RegisterLoop(_ =>
+        loop.RegisterLoop(loop2 =>
         {
-            mock.SetupInOrder(x => x.ExecuteAction("e"));
-            mock.SetupInOrder(x => x.ExecuteAction("f"));
+            mock.SetupInOrder(x => x.ExecuteAction("e"), loop2);
+            mock.SetupInOrder(x => x.ExecuteAction("f"), loop2);
         }, Times.AtLeast(2));
     }, Times.AtMost(2));
 });
+```
+
+## Other Invocations
+For everyone using loose mocks, it's possible to make sure that no other invocations were performed on the mock via the `PreventAllOtherInvocationsOf` method
+
+```c#
+var mock = new Mock<IDummy>(MockBehavior.Loose);
+var queue = CallQueue
+    .Create(q =>
+    {
+        mock.SetupInOrder(x => x.ExecuteAction("a"), q);
+    })
+    .PreventAllOtherInvocationsOf(mock);
+
+mock.Object.ExecuteAction("a");
+mock.Object.ExecuteAction("b");
+
+queue.VerifyOrder(); // will throw due to 'ExecuteAction("b")' call
 ```
 
 ## Logging
@@ -98,13 +118,13 @@ Optionally, you can pass an `ILogger<CallQueue>` into `CallQueue.Create` that wi
 var mock = new Mock<IDummy>();
 var queue = CallQueue.Create(x0 =>
     {
-        mock.SetupInOrder(x => x.ExecuteAction("a"));
-        mock.SetupInOrder(x => x.ExecuteAction("b"), Times.AtLeast(2));
+        mock.SetupInOrder(x => x.ExecuteAction("a"), x0);
+        mock.SetupInOrder(x => x.ExecuteAction("b"), Times.AtLeast(2), x0);
 
-        x0.RegisterLoop(_ =>
+        x0.RegisterLoop(x1 =>
         {
-            mock.SetupInOrder(x => x.ExecuteAction("c"));
-            mock.SetupInOrder(x => x.ExecuteAction("d"));
+            mock.SetupInOrder(x => x.ExecuteAction("c"), x1);
+            mock.SetupInOrder(x => x.ExecuteAction("d"), x1);
         }, Times.Exactly(2));
     },
     _logger);

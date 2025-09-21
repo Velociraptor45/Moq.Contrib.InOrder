@@ -6,54 +6,31 @@ namespace Moq.Contrib.InOrder
 {
     public abstract class QueueComponentBase : IQueueComponent
     {
-        internal readonly List<IQueueItem> Items = new List<IQueueItem>();
+        internal readonly List<IQueueItem> Items = new();
+        
+        internal abstract string? LoggingIndentation { get; }
+        public abstract IQueueComponent? Parent { get; }
 
-        [ThreadStatic]
-        public static CallQueue RootInstance;
-
-        [ThreadStatic]
-        internal static IQueueComponent CurrentInstance;
-
-        [ThreadStatic]
-        internal static ILogger<CallQueue> Logger;
-
-        [ThreadStatic]
-        private static string _loggingIndentation;
-
-        private static string LoggingIndentation
+        public Call RegisterCall(string mockClassName, string callExpression, Times times)
         {
-            get => _loggingIndentation ?? (_loggingIndentation = "\t");
-            set => _loggingIndentation = value;
-        }
-
-        public Call RegisterCall(string callExpression, Times times)
-        {
-            var call = new Call(callExpression, times);
+            var call = new Call(mockClassName, callExpression, times);
             Items.Add(call);
 
-            Logger?.LogInformation($"{LoggingIndentation}{GetTimesLogging(times)}{callExpression}");
+            Log($"{GetTimesLogging(times)}{callExpression}");
 
             return call;
         }
 
+        public abstract CallQueue GetRoot();
+
         public void RegisterLoop(Action<IQueueComponent> setups, Times times)
         {
-            var loop = new Loop(times);
+            var loop = new Loop(times, this);
             Items.Add(loop);
-            CurrentInstance = loop;
 
-            if (Logger != null)
-            {
-                Logger.LogInformation($"{LoggingIndentation}Loop: {GetTimesLogging(times)}");
-                LoggingIndentation = $"{LoggingIndentation}\t";
-            }
+            Log($"Loop: {GetTimesLogging(times)}");
 
             setups(loop);
-
-            if (Logger != null)
-                LoggingIndentation = LoggingIndentation.Remove(LoggingIndentation.Length - 1, 1);
-
-            CurrentInstance = this;
         }
 
         private static string GetTimesLogging(Times times)
@@ -72,6 +49,16 @@ namespace Moq.Contrib.InOrder
                 return $"(>={min} times) ";
 
             return $"({min} - {max} times) ";
+        }
+
+
+        private void Log(string msg)
+        {
+            var logger = GetRoot().Logger;
+            if (logger is null)
+                return;
+            
+            logger.LogInformation($"{LoggingIndentation}{msg}");
         }
     }
 }

@@ -4,13 +4,17 @@ using System.Linq;
 
 namespace Moq.Contrib.InOrder
 {
-    internal class Loop : QueueComponentBase, IQueueItem
+    internal sealed class Loop : QueueComponentBase, IQueueItem
     {
         private readonly Times _times;
 
-        public Loop(Times times)
+        public Loop(Times times, IQueueComponent parent)
         {
             _times = times;
+            Parent = parent;
+            
+            if (parent is QueueComponentBase { LoggingIndentation: not null } componentBase)
+                LoggingIndentation = componentBase.LoggingIndentation + "\t";
         }
 
         public string Expression
@@ -20,6 +24,14 @@ namespace Moq.Contrib.InOrder
                 var expressions = Items.Select(x => x.Expression);
                 return string.Join($",{Environment.NewLine}", expressions);
             }
+        }
+
+        internal override string? LoggingIndentation { get; }
+        public override IQueueComponent? Parent { get; }
+        
+        public override CallQueue GetRoot()
+        {
+            return Parent!.GetRoot();
         }
 
         public void VerifyOrder(Calls callQueue)
@@ -71,5 +83,6 @@ namespace Moq.Contrib.InOrder
 
             return Items.First().StartsWith(call);
         }
+
     }
 }

@@ -9,27 +9,48 @@ using Microsoft.Extensions.Logging;
 
 namespace Moq.Contrib.InOrder
 {
-    public class CallQueue : QueueComponentBase
+    public sealed class CallQueue : QueueComponentBase
     {
-        private readonly Calls _unverifiedReceivedCalls = new Calls();
-        private readonly List<Call> _receivedCalls = new List<Call>();
+        private readonly Calls _unverifiedReceivedCalls = new();
+        private readonly List<Call> _receivedCalls = new();
+        private readonly List<IInvocationList> _preventedInvocationMocks = [];
         public IReadOnlyCollection<Call> ReceivedCalls => _receivedCalls;
 
-        public static CallQueue Create(Action<IQueueComponent> value, ILogger<CallQueue> logger = null)
+        internal override string? LoggingIndentation { get; }
+        public override IQueueComponent? Parent => null;
+        internal ILogger<CallQueue>? Logger { get; }
+
+        public static CallQueue Empty => Create(_ => { });
+        
+        private CallQueue(ILogger<CallQueue>? logger)
         {
             Logger = logger;
+            if(logger is not null)
+                LoggingIndentation = "\t";
+        }
+        
+        public override CallQueue GetRoot()
+        {
+            return this;
+        }
 
-            var queue = new CallQueue();
-            RootInstance = queue;
-            CurrentInstance = queue;
+        public static CallQueue Create(Action<IQueueComponent> value, ILogger<CallQueue>? logger = null)
+        {
+            var queue = new CallQueue(logger);
 
-            Logger?.LogInformation("Expected Calls:");
+            queue.Logger?.LogInformation("Expected Calls:");
             value(queue);
 
-            Logger?.LogInformation("----------------------------");
-            Logger?.LogInformation("Received Calls:");
+            queue.Logger?.LogInformation("----------------------------");
+            queue.Logger?.LogInformation("Received Calls:");
 
             return queue;
+        }
+        
+        public CallQueue PreventAllOtherInvocationsOf(params Mock[] mock)
+        {
+            _preventedInvocationMocks.AddRange(mock.Select(m => m.Invocations));
+            return this;
         }
 
         internal void ReceiveCall(Call call)
@@ -53,6 +74,13 @@ namespace Moq.Contrib.InOrder
             if (_unverifiedReceivedCalls.Any())
                 throw new MoqOrderViolatedException(
                     $"All setups satisfied but the following calls are remaining and missing a corresponding setup:{Environment.NewLine}{_unverifiedReceivedCalls.Expressions}");
+
+            var allOtherCalls = _preventedInvocationMocks
+                .SelectMany(i => i.Select(x => x))
+                .Where(c => c.MatchingSetup is not null)
+                .ToList();
+            if (allOtherCalls.Count > 0)
+                throw new UnexpectedMoqInvocationException(allOtherCalls.Select(c => c.ToString()!));
         }
     }
 }
