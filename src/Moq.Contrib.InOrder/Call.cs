@@ -6,8 +6,19 @@ using System.Linq;
 namespace Moq.Contrib.InOrder
 {
     [DebuggerDisplay("{Expression}")]
-    public record Call(string MockClassName, string Expression, Times Times) : IQueueItem
+    public sealed class Call : IQueueItem
     {
+        public Call(string mockClassName, string expression, Times times)
+        {
+            MockClassName = mockClassName;
+            Expression = expression;
+            Times = times;
+        }
+        
+        public string MockClassName { get; }
+        public string Expression { get; }
+        public Times Times { get; }
+        
         public void VerifyOrder(Calls callQueue)
         {
             var (min, max) = Times;

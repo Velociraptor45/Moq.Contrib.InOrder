@@ -1108,6 +1108,32 @@ public class CallQueueTests
     }
 
     [Fact]
+    public async Task VerifyOrder_WithSettingUpCallWithSameExpressionString_ShouldNotThrow()
+    {
+        var mock = new Mock<IDummy>(MockBehavior.Strict);
+
+        Guid[] guids = [Guid.NewGuid(), Guid.NewGuid()];
+        
+        var queue = CallQueue
+            .Create(x0 =>
+            {
+                foreach (Guid guid in guids)
+                {
+                    mock.SetupInOrder(x => x.ExecuteAction(guid), x0).ReturnsAsync(guid);
+                }
+            }, _logger);
+
+        await mock.Object.ExecuteAction(guids[0]);
+        await mock.Object.ExecuteAction(guids[1]);
+
+        // Act
+        var func = () => queue.VerifyOrder();
+
+        // Assert
+        func.Should().NotThrow();
+    }
+
+    [Fact]
     public void Empty_ShouldReturnEmptyCallQueue()
     {
         // Act
@@ -1127,6 +1153,7 @@ public class CallQueueTests
         void ExecuteAction(string s);
 
         void ExecuteAction(DummyClass c);
+        Task<Guid> ExecuteAction(Guid g);
     }
 
     public class DummyClass
